@@ -12,8 +12,12 @@ from kivy.lang import Builder
 from kivy.factory import Factory
 import re
 import datetime
-
 import json
+
+#For GPS
+'''from plyer import gps
+from kivy.clock import Clock, mainthread
+from kivy.uix.popup import Popup'''
 
 APPID = '853481385dd8438d4cc2efe3a95f929f'
 
@@ -66,6 +70,24 @@ class AddLocationForm(BoxLayout):
         self.search_results.data = [{'text': str(x)} for x in cities]
         print(f"self.search_results.data={self.search_results.data}")
 
+    #GPS
+    '''def current_location(self):
+        try:
+            gps.configure(on_location=self.on_location)
+            gps.start()
+        except NotImplementedError:
+            popup = Popup(title="GPS Error",content=Label(text="GPS support is not implemented on your platform")).open()
+            Clock.schedule_once(lambda d: popup.dismiss(), 3)
+
+    @mainthread
+    def on_location(self, **kwargs):
+        search_template = "http://api.openweathermap.org/data/2.5/" +
+            "weather?lat={}&lon={}"
+        search_url = search_template.format(kwargs['lat'], kwargs['lon'])
+        data = requests.get(search_url).json()
+        location = (data['sys']['country'], data['name'])
+        WeatherApp.get_running_app().root.show_current_weather(location)'''
+
 
 class CurrentWeather(BoxLayout):
     location = ListProperty(['New York', 'US'])
@@ -98,18 +120,16 @@ class Forecast(BoxLayout):
     def update_weather(self):
         config = TestApp.get_running_app().config
         temp_type = config.getdefault("General", "temp_type", "metric").lower()
-        weather_template = "http://api.openweathermap.org/data/2.5/forecast" +"?q={},{}&units={}&cnt=3&APPID={}"
+        weather_template = "http://api.openweathermap.org/data/2.5/forecast" +"?q={},{}&units={}&cnt=10&APPID={}"
         weather_url = weather_template.format(
             self.location[0], 
             self.location[1], 
             temp_type,
             APPID)
         request = UrlRequest(weather_url, self.weather_retrieved)
-        print(weather_url)
             
     def weather_retrieved(self, request, data):
         data = json.loads(data.decode()) if not isinstance(data, dict) else data
-        print(data)
         self.forecast_container.clear_widgets()
         for day in data['list']:
             label = Factory.ForecastLabel()
@@ -183,6 +203,10 @@ class TestApp(App):
             except AttributeError:
                 pass
             
+    #GPS
+    '''def on_pause(self):
+        return True'''
+
     def build(self):
         return Builder.load_file("main.kv")
 
