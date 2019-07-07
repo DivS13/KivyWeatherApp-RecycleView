@@ -8,6 +8,7 @@ from kivy.uix.behaviors import FocusBehavior
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.network.urlrequest import UrlRequest
 from kivy.lang import Builder
+from kivy.factory import Factory
 
 import json
 
@@ -41,7 +42,8 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         ''' Respond to the selection of items in the view. '''
         self.selected = is_selected
         if is_selected:
-            print('Selected {}'.format(rv.data[index]))
+            print('Selected {}'.format(rv.data[index]['text']))
+            self.parent.parent.parent.parent.show_current_weather(rv.data[index]['text'])#Fix This
 
 
 class AddLocationForm(BoxLayout):
@@ -60,8 +62,17 @@ class AddLocationForm(BoxLayout):
         print(f"self.search_results.data={self.search_results.data}")
 
 
+
 class WeatherRoot(BoxLayout):
-    pass
+    def show_current_weather(self, location):
+        self.clear_widgets()
+        current_weather = Factory.CurrentWeather()
+        current_weather.location = location
+        self.add_widget(current_weather)
+
+    def show_add_location_form(self):
+        self.clear_widgets()
+        self.add_widget(AddLocationForm())
 
 
 class TestApp(App):

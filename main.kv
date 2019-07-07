@@ -54,4 +54,21 @@ WeatherRoot:
             multiselect: False
             touch_multiselect: False
 		
-			
+<CurrentWeather@BoxLayout>:
+    location: "" # <1>
+    conditions: None
+    temp: None
+    temp_min: None
+    temp_max: None
+    orientation: "vertical" #<2>
+    Label:
+        text: root.location # <3>
+    BoxLayout:
+        orientation: "horizontal"
+        size_hint_y: None
+        height: "40dp"
+        Button:
+            text: "Add Location"
+			on_press: app.root.show_add_location_form()
+        Button:
+            text: "Forecast"
