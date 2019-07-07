@@ -61,12 +61,14 @@ WeatherRoot:
 		
 <CurrentWeather>:
     orientation: "vertical"
+	degree: '°'[1:]
+	value: '{}C'.format(root.degree) if(root.temp_type)== 'metric' else '{}F'.format(root.degree)
     BoxLayout:
         Label:
             text: "{} ({})".format(root.location[0], root.location[1])
             font_size: "30dp"
         Label:
-            text: "{}".format(root.temp)
+            text: "{}{}".format(root.temp,root.value)
             font_size: "30dp"
 	BoxLayout:
         orientation: "horizontal"
@@ -77,9 +79,9 @@ WeatherRoot:
     BoxLayout:
         orientation: "horizontal"
         Label:
-            text: "Low: {}".format(root.temp_min)
+            text: "Low: {}{}".format(root.temp_min, root.value)
         Label:
-            text: "High: {}".format(root.temp_max)
+            text: "High: {}{}".format(root.temp_max, root.value)
     BoxLayout:
         orientation: "horizontal"
         size_hint_y: None 
