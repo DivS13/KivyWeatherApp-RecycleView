@@ -2,13 +2,15 @@ from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.label import Label
-from kivy.properties import BooleanProperty, ObjectProperty
+from kivy.properties import BooleanProperty, ObjectProperty, ListProperty
+from kivy.properties import StringProperty, NumericProperty
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.behaviors import FocusBehavior
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.network.urlrequest import UrlRequest
 from kivy.lang import Builder
 from kivy.factory import Factory
+import re
 
 import json
 
@@ -42,8 +44,10 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         ''' Respond to the selection of items in the view. '''
         self.selected = is_selected
         if is_selected:
-            print('Selected {}'.format(rv.data[index]['text']))
-            self.parent.parent.parent.parent.show_current_weather(rv.data[index]['text'])#Fix This
+            text_string = rv.data[index]['text']
+            self.location = re.sub('\(|\)', '',text_string).rsplit(' ',1)
+            print('Selected {}'.format(self.location))
+            self.parent.parent.parent.parent.show_current_weather(self.location)#Fix This
 
 
 class AddLocationForm(BoxLayout):
@@ -62,6 +66,27 @@ class AddLocationForm(BoxLayout):
         print(f"self.search_results.data={self.search_results.data}")
 
 
+class CurrentWeather(BoxLayout):
+    location = ListProperty(['New York', 'US'])
+    conditions = StringProperty()
+    temp = NumericProperty()
+    temp_min = NumericProperty()
+    temp_max = NumericProperty()
+    conditions_image = StringProperty()
+    temp_type = StringProperty()
+
+    def update_weather(self):
+        weather_template = "http://api.openweathermap.org/data/2.5/" + "weather?q={},{}&units=metric&APPID={}"
+        weather_url = weather_template.format(*self.location,APPID)
+        request = UrlRequest(weather_url, self.weather_retrieved)
+        
+    def weather_retrieved(self, request, data):
+        data = json.loads(data.decode()) if not isinstance(data, dict) else data
+        self.conditions = data['weather'][0]['description']
+        self.conditions_image = "http://openweathermap.org/img/w/{}.png".format(data['weather'][0]['icon'])
+        self.temp = data['main']['temp']
+        self.temp_min = data['main']['temp_min']
+        self.temp_max = data['main']['temp_max']
 
 class WeatherRoot(BoxLayout):
 
@@ -70,11 +95,13 @@ class WeatherRoot(BoxLayout):
     def show_current_weather(self, location = None):
         self.clear_widgets()
 
-        if location is None and self.current_weather is None:  
-            location = "New York (US)"
-        if location is not None:  
-            self.current_weather = Factory.CurrentWeather()
+        if self.current_weather is None:
+           self.current_weather = CurrentWeather()
+    
+        if location is not None:
             self.current_weather.location = location
+
+        self.current_weather.update_weather()
         self.add_widget(self.current_weather)
 
     def show_add_location_form(self):

@@ -59,21 +59,33 @@ WeatherRoot:
         text: "Cancel"
         on_press: app.root.show_current_weather(None)
 		
-<CurrentWeather@BoxLayout>:
-    location: "" # <1>
-    conditions: None
-    temp: None
-    temp_min: None
-    temp_max: None
-    orientation: "vertical" #<2>
-    Label:
-        text: root.location # <3>
+<CurrentWeather>:
+    orientation: "vertical"
+    BoxLayout:
+        Label:
+            text: "{} ({})".format(root.location[0], root.location[1])
+            font_size: "30dp"
+        Label:
+            text: "{}".format(root.temp)
+            font_size: "30dp"
+	BoxLayout:
+        orientation: "horizontal"
+        Label:
+            text: root.conditions
+        AsyncImage:
+            source: root.conditions_image
     BoxLayout:
         orientation: "horizontal"
-        size_hint_y: None
+        Label:
+            text: "Low: {}".format(root.temp_min)
+        Label:
+            text: "High: {}".format(root.temp_max)
+    BoxLayout:
+        orientation: "horizontal"
+        size_hint_y: None 
         height: "40dp"
         Button:
             text: "Add Location"
-			on_press: app.root.show_add_location_form()
+            on_press: app.root.show_add_location_form()
         Button:
             text: "Forecast"
