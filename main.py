@@ -40,6 +40,8 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
     def apply_selection(self, rv, index, is_selected):
         ''' Respond to the selection of items in the view. '''
         self.selected = is_selected
+        if is_selected:
+            print('Selected {}'.format(rv.data[index]))
 
 
 class AddLocationForm(BoxLayout):
@@ -47,10 +49,9 @@ class AddLocationForm(BoxLayout):
     search_results = ObjectProperty()
 
     def search_location(self):
-        search_template = "https://samples.openweathermap.org/data/2.5/find?q={}&appid={}"
-        # search_template = "https://api.openweathermap.org/data/2.5/find?q={}&typle=like&appid=xyz"    # Replace 'xyz' with your API Key (APPID)
+        search_template = "http://api.openweathermap.org/data/2.5/" + "find?q={}&type=like&APPID={}"
         search_url = search_template.format(self.search_input.text, APPID)
-        request = UrlRequest(search_url, self.found_location)
+        request = UrlRequest(search_url,self.found_location)
 
     def found_location(self, request, data):
         data = json.loads(data.decode()) if not isinstance(data, dict) else data
