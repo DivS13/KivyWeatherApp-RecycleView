@@ -11,6 +11,7 @@ from kivy.network.urlrequest import UrlRequest
 from kivy.lang import Builder
 from kivy.factory import Factory
 import re
+import datetime
 
 import json
 
@@ -90,9 +91,44 @@ class CurrentWeather(BoxLayout):
         self.temp_min = data['main']['temp_min']
         self.temp_max = data['main']['temp_max']
 
+class Forecast(BoxLayout):
+    location = ListProperty(['New York', 'US'])
+    forecast_container = ObjectProperty()
+
+    def update_weather(self):
+        config = TestApp.get_running_app().config
+        temp_type = config.getdefault("General", "temp_type", "metric").lower()
+        weather_template = "http://api.openweathermap.org/data/2.5/forecast" +"?q={},{}&units={}&cnt=3&APPID={}"
+        weather_url = weather_template.format(
+            self.location[0], 
+            self.location[1], 
+            temp_type,
+            APPID)
+        request = UrlRequest(weather_url, self.weather_retrieved)
+        print(weather_url)
+            
+    def weather_retrieved(self, request, data):
+        data = json.loads(data.decode()) if not isinstance(data, dict) else data
+        print(data)
+        self.forecast_container.clear_widgets()
+        for day in data['list']:
+            label = Factory.ForecastLabel()
+            label.date = datetime.datetime.fromtimestamp(day['dt']).strftime(
+                "%a %b %d")
+
+            label.conditions = day['weather'][0]['description']
+            label.conditions_image = "http://openweathermap.org/img/w/{}.png".format(
+                day['weather'][0]['icon'])
+            label.temp_min = day['main']['temp_min']
+            label.temp_max = day['main']['temp_max']
+            self.forecast_container.add_widget(label)
+
+
 class WeatherRoot(BoxLayout):
 
     current_weather = ObjectProperty()
+    forecast = ObjectProperty()
+    locations = ObjectProperty()
 
     def show_current_weather(self, location = None):
         self.clear_widgets()
@@ -105,6 +141,18 @@ class WeatherRoot(BoxLayout):
 
         self.current_weather.update_weather()
         self.add_widget(self.current_weather)
+
+    def show_forecast(self, location=None):
+        self.clear_widgets()
+
+        if self.forecast is None:
+            self.forecast = Factory.Forecast()
+
+        if location is not None:
+            self.forecast.location = location
+
+        self.forecast.update_weather()
+        self.add_widget(self.forecast)
 
     def show_add_location_form(self):
         self.clear_widgets()
