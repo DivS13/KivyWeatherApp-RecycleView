@@ -19,7 +19,7 @@ import json
 from kivy.clock import Clock, mainthread
 from kivy.uix.popup import Popup'''
 
-APPID = '853481385dd8438d4cc2efe3a95f929f'
+APPID = 'INSERT YOUR API KEY HERE'
 
 class SelectableRecycleBoxLayout(FocusBehavior, LayoutSelectionBehavior,
                                  RecycleBoxLayout):
