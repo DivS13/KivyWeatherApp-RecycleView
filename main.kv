@@ -83,7 +83,13 @@ WeatherRoot:
             text: "Low: {}{}".format(root.temp_min, root.value)
         Label:
             text: "High: {}{}".format(root.temp_max, root.value)
-    BoxLayout:
+    Button:
+		size_hint_y: None
+		height: "40dp"
+		text: 'Settings'
+		on_press: app.open_settings()
+	
+	BoxLayout:
         orientation: "horizontal"
         size_hint_y: None 
         height: "40dp"
